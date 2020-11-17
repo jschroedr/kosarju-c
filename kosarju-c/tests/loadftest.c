@@ -36,7 +36,9 @@ void testLoadFile() {
 
 void testLoadFromAdjacencyList() {
     char * fname = getExampleFileName();
-    char ** rows = loadFromAdjacencyList(fname);
+    int * nrows;
+    char ** rows = loadFromAdjacencyList(fname, nrows);
+    CU_ASSERT(*nrows > 0);
     CU_ASSERT_PTR_NOT_NULL(rows);
     char * row = rows[0];
     int rlen = strlen(row);
@@ -46,6 +48,9 @@ void testLoadFromAdjacencyList() {
         CU_FAIL("first row of rows had no characters");
     }
 }
+
+int setup_suite(void) { return 0; }
+int teardown_suite(void) { return 0; }
 
 
 int main() {
@@ -74,6 +79,6 @@ int main() {
     /* Run all tests using the CUnit Basic interface */
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
-    CU_cleanup_registry();
+    // CU_cleanup_registry();
     return CU_get_error();
 }

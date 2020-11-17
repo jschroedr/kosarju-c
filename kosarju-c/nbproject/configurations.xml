@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>graph.h</itemPath>
       <itemPath>loadf.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -56,6 +57,8 @@
           </linkerLibItems>
         </linkerTool>
       </folder>
+      <item path="graph.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="loadd.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="loadf.c" ex="false" tool="0" flavor2="0">
@@ -96,6 +99,8 @@
           </linkerLibItems>
         </linkerTool>
       </folder>
+      <item path="graph.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="loadd.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="loadf.c" ex="false" tool="0" flavor2="0">

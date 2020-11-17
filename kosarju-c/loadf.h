@@ -29,4 +29,4 @@ extern "C" {
 
 
 FILE * loadFile(char * fname);
-char ** loadFromAdjacencyList(char * fname);
+char ** loadFromAdjacencyList(char * fname, int * nrows);

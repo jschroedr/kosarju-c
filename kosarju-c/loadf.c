@@ -18,7 +18,7 @@ FILE * loadFile( char * fname ) {
     return f;
 }
 
-char ** loadFromAdjacencyList( char * fname ) {
+char ** loadFromAdjacencyList( char * fname, int * nrows ) {
     
     // generate a valid file pointer
     FILE * f = loadFile(fname);
@@ -28,23 +28,25 @@ char ** loadFromAdjacencyList( char * fname ) {
     
     int nread;
     
+    // len: size of the resulting string in bytes from getline()
     size_t len;
     
+    // line: 
     char * line = NULL;
     
     while((nread = getline(&line, &len, f)) != -1) {
         
         // calculate the length of the line in characters
-        int slen = strlen(line);
+        int slen = strlen(line);  // plus null terminator
+        
+        rlen ++;
+        rows = realloc(rows, sizeof(char **) * rlen);
+        rows[rlen - 1] = malloc(sizeof(char *) * (slen + 1));
         
         // append the row to our list of rows
-        rows = realloc(rows, sizeof(char **) * (rlen + 2));
-        rows[rlen] = realloc(rows[rlen], sizeof(char *) * (slen + 1));
-        
-        strncpy(rows[rlen], line, len);
-        
-        rlen ++;  // aka new row
+        strncpy(rows[rlen - 1], line, slen);
         
     } 
+    *nrows = rlen;
     return rows;
 }
