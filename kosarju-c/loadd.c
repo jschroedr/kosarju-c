@@ -16,8 +16,10 @@
 
 int __loadd_check_exists_vertex(graph * g, char * label) {
     for(int i = 0; i < g->vlen; i++) {
-        char * vlabel = g->vertices[i]->label;
-        int label_match = strcmp(vlabel, label);
+        int label_match = strcmp(
+            g->vertices[i]->label, 
+            label
+        );
         if (label_match == 0) {
             return i;
         }
@@ -28,20 +30,24 @@ int __loadd_check_exists_vertex(graph * g, char * label) {
 
 graph * __loadd_create_vertex(graph * g, char * label, int llen) {
     int len = llen + 1;  // +1 for null terminator
-    char * cpy = malloc(sizeof(char*) * len);
+    char * cpy = malloc(sizeof(cpy) * len);
     strncpy(cpy, label, len);
     
     g->vlen ++;
     g->vertices = realloc(g->vertices, sizeof(vertex **) * g->vlen);
+    if(!g->vertices) {
+        perror("loadd.c: g->vertices allocation failed");
+        exit(EXIT_FAILURE);
+    }
     
-    vertex * v = malloc(sizeof(vertex *));
+    vertex * v = malloc(sizeof(*v));
     v->elen = 0;
     v->label = cpy;
-    v->edges = malloc(sizeof(edge**));
+    v->edges = malloc(sizeof(edge));
     
     v->discovered = 0;
-    v->isLeader = 0;
     v->leader = NULL;
+    v->isLeader = 0;
     
     g->vertices[g->vlen - 1] = v;
     
@@ -53,8 +59,10 @@ graph * _loadd_check_and_create_vertex(graph * g, char * label, int llen, int * 
     int exists = __loadd_check_exists_vertex(g, label);
     if(exists == 0) {
         g = __loadd_create_vertex(g, label, llen);
+        *idx = g->vlen - 1;
+    } else {
+        *idx = exists;
     }
-    *idx = exists;
     return g;
 }
 
@@ -82,27 +90,21 @@ int __loadd_check_exists_edge(graph * g, int hidx, int tidx) {
 
 graph * __loadd_create_edge(graph * g, int hidx, int tidx) {
     
-    edge * e = malloc(sizeof(edge *));
+    edge * e = malloc(sizeof(*e));
     e->head = g->vertices[hidx];
     e->tail = g->vertices[tidx];
     
     g->elen ++;
-    g->edges = realloc(g->edges, sizeof(edge **) * g->elen);
+    g->edges = realloc(g->edges, sizeof(edge**) * g->elen);
     g->edges[g->elen - 1] = e;
     
-    g->vertices[hidx]->elen ++;
-    g->vertices[hidx]->edges = realloc(
-            g->vertices[hidx]->edges, 
-            sizeof(edge **) * g->vertices[hidx]->elen
-    );
-    g->vertices[hidx]->edges[g->vertices[hidx]->elen - 1] = e;
+    // vertex * head = g->vertices[hidx];
+    // head->elen ++;
+    // head->edges = __loadd_add_edge_to_edges(head->edges, head->elen, e);
     
-    g->vertices[tidx]->elen ++;
-    g->vertices[tidx]->edges = realloc(
-            g->vertices[tidx]->edges, 
-            sizeof(edge **) * g->vertices[tidx]->elen
-    );
-    g->vertices[tidx]->edges[g->vertices[tidx]->elen - 1] = e;
+    // vertex * tail = g->vertices[tidx];
+    // tail->elen ++;
+    // tail->edges = __loadd_add_edge_to_edges(tail->edges, tail->elen, e);
     
     return g;
 }
@@ -121,9 +123,14 @@ graph * _loadd_check_and_create_edge(graph * g, int hidx, int tidx) {
 // and rows of file data from an adjancecy matrix
 graph * loadd_adj_list(char ** rows, int * nrows) {
     
-    graph * g = malloc(sizeof(graph *));
+    graph * g = malloc(sizeof(graph));
+    g->elen = 0;
+    g->vlen = 0;
+    g->directed = 1;
+    g->vertices = NULL;
+    g->edges = NULL;
     
-    char * label;
+    char * label = NULL;
     int llen = 0;  // length of the label
     
     for(int i = 0; i < *nrows; i ++) {
@@ -170,8 +177,11 @@ graph * loadd_adj_list(char ** rows, int * nrows) {
                 label = realloc(label, sizeof(char *) * (llen + 1));
                 label[llen - 1] = c;
             }
+            cIdx ++;
         }
-        cIdx ++;
     }
+    // clean up local memory allocation for the function
+    free(label);
+    
     return g;
 }

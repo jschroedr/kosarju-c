@@ -4,6 +4,7 @@
  * `````````````````````````````````````````````````````````````````````````````
  * 
  */
+#define  _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,6 +48,19 @@ char ** loadFromAdjacencyList( char * fname, int * nrows ) {
         strncpy(rows[rlen - 1], line, slen);
         
     } 
+    
+    free(line);
+    fclose(f);
+    
     *nrows = rlen;
     return rows;
+}
+
+
+void free_rows(char ** rows, int nrows) {
+    int len = nrows - 1;
+    for(int i = len; i >= 0; i-- ) {
+        free(rows[i]);
+    }
+    free(rows);
 }

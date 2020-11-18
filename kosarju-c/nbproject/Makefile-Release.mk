@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/graph.o \
 	${OBJECTDIR}/loadd.o \
 	${OBJECTDIR}/loadf.o \
 	${OBJECTDIR}/main.o
@@ -44,10 +45,12 @@ TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
 
 # Test Files
 TESTFILES= \
-	${TESTDIR}/TestFiles/f1
+	${TESTDIR}/TestFiles/f1 \
+	${TESTDIR}/TestFiles/f2
 
 # Test Object Files
 TESTOBJECTFILES= \
+	${TESTDIR}/tests/loaddtestsuite.o \
 	${TESTDIR}/tests/loadftest.o
 
 # C Compiler Flags
@@ -73,6 +76,11 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/kosarju-c: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/kosarju-c ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/graph.o: graph.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/graph.o graph.c
 
 ${OBJECTDIR}/loadd.o: loadd.c
 	${MKDIR} -p ${OBJECTDIR}
@@ -100,12 +108,35 @@ ${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/loadftest.o ${OBJECTFILES:%.o=%_nomain
 	${MKDIR} -p ${TESTDIR}/TestFiles
 	${LINK.c} -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS}   -lcunit 
 
+${TESTDIR}/TestFiles/f2: ${TESTDIR}/tests/loaddtestsuite.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.c} -o ${TESTDIR}/TestFiles/f2 $^ ${LDLIBSOPTIONS}   -lcunit 
+
 
 ${TESTDIR}/tests/loadftest.o: tests/loadftest.c 
 	${MKDIR} -p ${TESTDIR}/tests
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/loadftest.o tests/loadftest.c
 
+
+${TESTDIR}/tests/loaddtestsuite.o: tests/loaddtestsuite.c 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/loaddtestsuite.o tests/loaddtestsuite.c
+
+
+${OBJECTDIR}/graph_nomain.o: ${OBJECTDIR}/graph.o graph.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/graph.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.c) -O2 -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/graph_nomain.o graph.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/graph.o ${OBJECTDIR}/graph_nomain.o;\
+	fi
 
 ${OBJECTDIR}/loadd_nomain.o: ${OBJECTDIR}/loadd.o loadd.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -151,6 +182,7 @@ ${OBJECTDIR}/main_nomain.o: ${OBJECTDIR}/main.o main.c
 	@if [ "${TEST}" = "" ]; \
 	then  \
 	    ${TESTDIR}/TestFiles/f1 || true; \
+	    ${TESTDIR}/TestFiles/f2 || true; \
 	else  \
 	    ./${TEST} || true; \
 	fi

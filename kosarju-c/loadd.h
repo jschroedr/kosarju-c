@@ -5,14 +5,14 @@
  */
 
 /* 
- * File:   loadf.h
+ * File:   loadd.h
  * Author: jake
  *
- * Created on November 15, 2020, 7:15 PM
+ * Created on November 16, 2020, 8:06 PM
  */
 
-#ifndef LOADF_H
-#define LOADF_H
+#ifndef LOADD_H
+#define LOADD_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,9 +25,6 @@ extern "C" {
 }
 #endif
 
-#endif /* LOADF_H */
+#endif /* LOADD_H */
 
-
-FILE * loadFile(char * fname);
-char ** loadFromAdjacencyList(char * fname, int * nrows);
-void free_rows(char ** rows, int nrows);
+graph * loadd_adj_list(char ** rows, int * nrows);

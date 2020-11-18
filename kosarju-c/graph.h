@@ -48,4 +48,7 @@ typedef struct Graph {
     int vlen;
     edge ** edges;
     int elen;
+    int directed;
 } graph;
+
+void free_graph(graph * g);
