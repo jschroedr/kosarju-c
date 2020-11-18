@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/graph.o \
+	${OBJECTDIR}/kosarju.o \
 	${OBJECTDIR}/loadd.o \
 	${OBJECTDIR}/loadf.o \
 	${OBJECTDIR}/main.o
@@ -81,6 +82,11 @@ ${OBJECTDIR}/graph.o: graph.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -Werror -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/graph.o graph.c
+
+${OBJECTDIR}/kosarju.o: kosarju.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -Werror -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/kosarju.o kosarju.c
 
 ${OBJECTDIR}/loadd.o: loadd.c
 	${MKDIR} -p ${OBJECTDIR}
@@ -136,6 +142,19 @@ ${OBJECTDIR}/graph_nomain.o: ${OBJECTDIR}/graph.o graph.c
 	    $(COMPILE.c) -g -Werror -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/graph_nomain.o graph.c;\
 	else  \
 	    ${CP} ${OBJECTDIR}/graph.o ${OBJECTDIR}/graph_nomain.o;\
+	fi
+
+${OBJECTDIR}/kosarju_nomain.o: ${OBJECTDIR}/kosarju.o kosarju.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/kosarju.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.c) -g -Werror -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/kosarju_nomain.o kosarju.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/kosarju.o ${OBJECTDIR}/kosarju_nomain.o;\
 	fi
 
 ${OBJECTDIR}/loadd_nomain.o: ${OBJECTDIR}/loadd.o loadd.c 

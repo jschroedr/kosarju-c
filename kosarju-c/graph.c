@@ -8,6 +8,23 @@
 #include "graph.h"
 
 
+void reverse_edges(edge ** edges, int elen) {
+    for(int i = 0; i < elen; i ++) {
+        vertex * head = edges[i]->head;
+        edges[i]->head = edges[i]->tail;
+        edges[i]->tail = head;
+    }
+}
+
+void reverse_graph(graph * g) {
+    reverse_edges(g->edges, g->elen);
+    for (int i = 0; i < g->vlen; i ++) {
+        vertex * v = g->vertices[i];
+        reverse_edges((edge**)v->edges, v->elen);
+    }
+}
+
+
 void free_vertex(vertex * v) {
     free(v->label);
     free(v->edges);

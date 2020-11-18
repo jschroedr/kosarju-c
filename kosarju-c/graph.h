@@ -33,7 +33,8 @@ typedef struct Vertex {
     void ** edges;
     int discovered;
     void * leader;
-    int isLeader;
+    int is_leader;
+    int finish_time;
 } vertex;
 
 
@@ -51,4 +52,5 @@ typedef struct Graph {
     int directed;
 } graph;
 
+void reverse_graph(graph * g);
 void free_graph(graph * g);

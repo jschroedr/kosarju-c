@@ -15,16 +15,14 @@
 
 
 int __loadd_check_exists_vertex(graph * g, char * label) {
+    int label_int = atoi(label);
     for(int i = 0; i < g->vlen; i++) {
-        int label_match = strcmp(
-            g->vertices[i]->label, 
-            label
-        );
-        if (label_match == 0) {
+        int v_label_int = atoi(g->vertices[i]->label);
+        if (label_int == v_label_int) {
             return i;
         }
     }
-    return 0;
+    return -1;
 }
 
 
@@ -43,11 +41,12 @@ graph * __loadd_create_vertex(graph * g, char * label, int llen) {
     vertex * v = malloc(sizeof(*v));
     v->elen = 0;
     v->label = cpy;
-    v->edges = malloc(sizeof(edge));
+    v->edges = malloc(sizeof(edge**));
     
     v->discovered = 0;
     v->leader = NULL;
-    v->isLeader = 0;
+    v->is_leader = 0;
+    v->finish_time = -1;
     
     g->vertices[g->vlen - 1] = v;
     
@@ -57,7 +56,7 @@ graph * __loadd_create_vertex(graph * g, char * label, int llen) {
 
 graph * _loadd_check_and_create_vertex(graph * g, char * label, int llen, int * idx) {
     int exists = __loadd_check_exists_vertex(g, label);
-    if(exists == 0) {
+    if(exists == -1) {
         g = __loadd_create_vertex(g, label, llen);
         *idx = g->vlen - 1;
     } else {
@@ -98,13 +97,15 @@ graph * __loadd_create_edge(graph * g, int hidx, int tidx) {
     g->edges = realloc(g->edges, sizeof(edge**) * g->elen);
     g->edges[g->elen - 1] = e;
     
-    // vertex * head = g->vertices[hidx];
-    // head->elen ++;
-    // head->edges = __loadd_add_edge_to_edges(head->edges, head->elen, e);
+    vertex * head = g->vertices[hidx];
+    head->elen ++;
+    head->edges = realloc(head->edges, sizeof(edge**) * head->elen);
+    head->edges[head->elen - 1] = e;
     
-    // vertex * tail = g->vertices[tidx];
-    // tail->elen ++;
-    // tail->edges = __loadd_add_edge_to_edges(tail->edges, tail->elen, e);
+    vertex * tail = g->vertices[tidx];
+    tail->elen ++;
+    tail->edges = realloc(tail->edges, sizeof(edge**) * tail->elen);
+    tail->edges[tail->elen - 1] = e;
     
     return g;
 }
