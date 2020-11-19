@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/graph.o \
+	${OBJECTDIR}/group.o \
 	${OBJECTDIR}/kosarju.o \
 	${OBJECTDIR}/loadd.o \
 	${OBJECTDIR}/loadf.o \
@@ -82,6 +83,11 @@ ${OBJECTDIR}/graph.o: graph.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/graph.o graph.c
+
+${OBJECTDIR}/group.o: group.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/group.o group.c
 
 ${OBJECTDIR}/kosarju.o: kosarju.c
 	${MKDIR} -p ${OBJECTDIR}
@@ -142,6 +148,19 @@ ${OBJECTDIR}/graph_nomain.o: ${OBJECTDIR}/graph.o graph.c
 	    $(COMPILE.c) -O2 -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/graph_nomain.o graph.c;\
 	else  \
 	    ${CP} ${OBJECTDIR}/graph.o ${OBJECTDIR}/graph_nomain.o;\
+	fi
+
+${OBJECTDIR}/group_nomain.o: ${OBJECTDIR}/group.o group.c 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/group.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.c) -O2 -std=c11 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/group_nomain.o group.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/group.o ${OBJECTDIR}/group_nomain.o;\
 	fi
 
 ${OBJECTDIR}/kosarju_nomain.o: ${OBJECTDIR}/kosarju.o kosarju.c 
