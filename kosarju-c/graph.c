@@ -9,7 +9,7 @@
 
 
 void reverse_edges(edge ** edges, int elen) {
-    for(int i = 0; i < elen; i ++) {
+    for(long long i = 0; i < elen; i ++) {
         vertex * head = edges[i]->head;
         edges[i]->head = edges[i]->tail;
         edges[i]->tail = head;
@@ -18,7 +18,7 @@ void reverse_edges(edge ** edges, int elen) {
 
 void reverse_graph(graph * g) {
     reverse_edges(g->edges, g->elen);
-    for (int i = 0; i < g->vlen; i ++) {
+    for (long long i = 0; i < g->vlen; i ++) {
         vertex * v = g->vertices[i];
         reverse_edges((edge**)v->edges, v->elen);
     }
@@ -40,13 +40,13 @@ void free_edge(edge * e) {
 void free_graph(graph * g) {
     
     int vlen = g->vlen - 1;
-    for(int j = vlen; j >= 0; j --) {
+    for(long long j = vlen; j >= 0; j --) {
         free_vertex(g->vertices[j]);
     }
     free(g->vertices);
     
     int elen = g->elen - 1;
-    for(int i = elen; i >= 0; i --) {
+    for(long long i = elen; i >= 0; i --) {
         free_edge(g->edges[i]);
     }
     free(g->edges);

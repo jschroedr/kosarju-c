@@ -29,7 +29,7 @@ extern "C" {
 
 typedef struct Vertex {
     char * label;
-    int elen;
+    long long elen;
     void ** edges;
     int discovered;
     void * leader;
@@ -46,10 +46,12 @@ typedef struct Edge {
 
 typedef struct Graph {
     vertex ** vertices;
-    int vlen;
+    long long vlen;
     edge ** edges;
-    int elen;
+    long long elen;
     int directed;
+    long long vmax;
+    long long ** vmap;
 } graph;
 
 void reverse_graph(graph * g);

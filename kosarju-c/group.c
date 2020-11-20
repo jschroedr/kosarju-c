@@ -11,10 +11,10 @@
 
 
 int _leader_in_groups(vertex * leader, garray * groups) {
-    for(int i = 0; i < groups->glen; i ++) {
-        int leader_int = atoi(leader->label);
+    for(long long i = 0; i < groups->glen; i ++) {
+        long long leader_int = atoll(leader->label);
         vertex * g_leader = groups->groups[i]->leader;
-        int group_leader_int = atoi(g_leader->label);
+        long long group_leader_int = atoll(g_leader->label);
         if (leader_int == group_leader_int) {
             groups->groups[i]->len = groups->groups[i]->len + 1;
             return 1;
@@ -40,10 +40,13 @@ garray * groups_from_graph(graph * g) {
     garray * groups = malloc(sizeof(garray*));
     groups->groups = malloc(sizeof(group *));
     groups->glen = 0;
-    int glen = 0;
-    for(int i = 0; i < g->vlen; i ++) {
+    for(long long i = 0; i < g->vlen; i ++) {
+        if (i % 10000 == 0) {
+            printf("\ngroup.c: processed: %lld", i);
+        }
+        
+
         vertex * leader = g->vertices[i]->leader;
-        // printf("\t\nlabel: %s, leader: %s", g->vertices[i]->label, leader->label);
         int present = _leader_in_groups(leader, groups);
         if (present == -1) {
             groups = _group_initialize(leader, groups);
@@ -60,7 +63,7 @@ int _compare_groups_by_size(const void * a, const void * b) {
 
 
 void sort_groups_by_size(garray * groups) {
-    int nmemb = groups->glen;
+    long long nmemb = groups->glen;
     group ** grps = groups->groups;
     size_t size = sizeof(grps[0]);
     qsort(grps, nmemb, size, _compare_groups_by_size);

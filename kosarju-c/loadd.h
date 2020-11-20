@@ -27,4 +27,4 @@ extern "C" {
 
 #endif /* LOADD_H */
 
-graph * loadd_adj_list(char ** rows, int * nrows);
+graph * loadd_adj_list(char ** rows, long long * nrows);

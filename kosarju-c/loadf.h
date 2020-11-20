@@ -29,5 +29,5 @@ extern "C" {
 
 
 FILE * loadFile(char * fname);
-char ** loadFromAdjacencyList(char * fname, int * nrows);
-void free_rows(char ** rows, int nrows);
+char ** loadFromAdjacencyList(char * fname, long long * nrows);
+void free_rows(char ** rows, long long nrows);

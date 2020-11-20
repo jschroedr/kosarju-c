@@ -19,7 +19,7 @@ FILE * loadFile( char * fname ) {
     return f;
 }
 
-char ** loadFromAdjacencyList( char * fname, int * nrows ) {
+char ** loadFromAdjacencyList( char * fname, long long * nrows ) {
     
     // generate a valid file pointer
     FILE * f = loadFile(fname);

@@ -30,13 +30,13 @@ extern "C" {
 
 typedef struct Group {
     vertex * leader;
-    int len;
+    long long len;
 } group;
 
 
 typedef struct GroupArray {
     group ** groups;
-    int glen;
+    long long glen;
 } garray;
 
 garray * groups_from_graph(graph * g);

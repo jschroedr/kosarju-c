@@ -21,7 +21,8 @@
 
 
 char * getExampleFileName() {
-   return "./test-files/input_mostlyCycles_60_80000.txt";
+   // return "/home/jake/Documents/Learning/kosarju-c/kosarju-c/test-files/input_mostlyCycles_64_160000.txt";
+   return "/home/jake/Documents/Learning/kosarju-c/kosarju-c/test-files/assn.txt";
 }
 
 /*
@@ -30,9 +31,12 @@ char * getExampleFileName() {
 int main(int argc, char** argv) {
     char * fname = getExampleFileName();
     printf("\nfile: %s", fname);
-    int nrows = 0;
+    long long nrows = 0;
     char ** rows = loadFromAdjacencyList(fname, &nrows);
+    
     graph * g = loadd_adj_list(rows, &nrows);
+    free_rows(rows, nrows);
+    
     
     kosarju_scc_twopass(g);
     
@@ -40,32 +44,21 @@ int main(int argc, char** argv) {
    
     sort_groups_by_size(groups);
     
-    /*
-    printf("\n");
-    for(int v = 0; v < g->vlen; v ++) {
-        printf("\nvertex: %s, leader: %s", g->vertices[v]->label, ((vertex *)g->vertices[v]->leader)->label);
-    }
-    */
-    
     printf("\n");
     for(int k = 0; k < 5; k ++) {
         if (k < groups->glen) {
-            // printf("(leader: %s, len: %d),", groups->groups[k]->leader->label, groups->groups[k]->len);
-            if (k < 4) {
-                printf("%d,", groups->groups[k]->len);
-            } else {
-                printf("%d", groups->groups[k]->len);
-            }
+            printf("%lld", groups->groups[k]->len);
             
         } else {
-            printf("0,");
+            printf("0");
         }
+        if (k < 4) {
+            printf(",");
+        } 
     }
     
-    
-    
     free_graph(g);
-    free_rows(rows, nrows);
+    
     return (EXIT_SUCCESS);
 }
 

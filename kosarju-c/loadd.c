@@ -14,22 +14,29 @@
 
 
 
-int __loadd_check_exists_vertex(graph * g, char * label) {
-    int label_int = atoi(label);
-    for(int i = 0; i < g->vlen; i++) {
-        int v_label_int = atoi(g->vertices[i]->label);
-        if (label_int == v_label_int) {
-            return i;
+graph * __loadd_check_exists_vertex(graph * g, char * label, long long * exists) {
+    long long label_int = atoll(label);
+    if (label_int > g->vmax) {
+        for(long long i = g->vmax; i <= label_int; i ++) {
+            long long * value = malloc(sizeof(int *));
+            *value = -1;
+            g->vmap[i] = value;
+            g->vmax = label_int;
         }
     }
-    return -1;
+    *exists = *(g->vmap[label_int]);
+    return g;
 }
 
 
-graph * __loadd_create_vertex(graph * g, char * label, int llen) {
-    int len = llen + 1;  // +1 for null terminator
+graph * __loadd_create_vertex(graph * g, char * label, long long llen) {
+    long long len = llen + 1;  // +1 for null terminator
     char * cpy = malloc(sizeof(cpy) * len);
     strncpy(cpy, label, len);
+    
+    // update the vmap for this label
+    long long label_int = atoi(label);
+    *(g->vmap[label_int]) = (g->vlen);   // set the map entry to the index
     
     g->vlen ++;
     g->vertices = realloc(g->vertices, sizeof(vertex **) * g->vlen);
@@ -54,8 +61,9 @@ graph * __loadd_create_vertex(graph * g, char * label, int llen) {
 }
 
 
-graph * _loadd_check_and_create_vertex(graph * g, char * label, int llen, int * idx) {
-    int exists = __loadd_check_exists_vertex(g, label);
+graph * _loadd_check_and_create_vertex(graph * g, char * label, long long llen, long long * idx) {
+    long long exists = -1;
+    g = __loadd_check_exists_vertex(g, label, &exists);
     if(exists == -1) {
         g = __loadd_create_vertex(g, label, llen);
         *idx = g->vlen - 1;
@@ -66,12 +74,12 @@ graph * _loadd_check_and_create_vertex(graph * g, char * label, int llen, int * 
 }
 
 
-int __loadd_check_edge_by_vertex(vertex * v, int head_label, int tail_label) {
-    for(int i = 0; i < v->elen; i ++) {
+long long __loadd_check_edge_by_vertex(vertex * v, long long head_label, long long tail_label) {
+    for(long long i = 0; i < v->elen; i ++) {
         edge * e = v->edges[i];
         // directed graph, so only check for exact match
-        int cmp_head_label = atoi(e->head->label);
-        int cmp_tail_label = atoi(e->tail->label);
+        long long cmp_head_label = atoi(e->head->label);
+        long long cmp_tail_label = atoi(e->tail->label);
         if (head_label == cmp_head_label && tail_label == cmp_tail_label) {
             return i;
         }
@@ -80,20 +88,20 @@ int __loadd_check_edge_by_vertex(vertex * v, int head_label, int tail_label) {
 }
 
 
-int __loadd_check_exists_edge(graph * g, int hidx, int tidx) {
-    int head_label = atoi(g->vertices[hidx]->label);
-    int tail_label = atoi(g->vertices[tidx]->label);
+long long __loadd_check_exists_edge(graph * g, long long hidx, long long tidx) {
+    long long head_label = atoll(g->vertices[hidx]->label);
+    long long tail_label = atoll(g->vertices[tidx]->label);
     
     // check the head edges
     vertex * head = g->vertices[hidx];
-    int head_check = __loadd_check_edge_by_vertex(head, head_label, tail_label);
+    long long head_check = __loadd_check_edge_by_vertex(head, head_label, tail_label);
     if(head_check != -1) {
         return head_check;
     }
     
     // check the tail edges
     vertex * tail = g->vertices[tidx];
-    int tail_check = __loadd_check_edge_by_vertex(tail, head_label, tail_label);
+    long long tail_check = __loadd_check_edge_by_vertex(tail, head_label, tail_label);
     if (tail_check != -1) {
         return tail_check;
     }
@@ -102,7 +110,7 @@ int __loadd_check_exists_edge(graph * g, int hidx, int tidx) {
 }
 
 
-graph * __loadd_create_edge(graph * g, int hidx, int tidx) {
+graph * __loadd_create_edge(graph * g, long long hidx, long long tidx) {
     
     edge * e = malloc(sizeof(*e));
     e->head = g->vertices[hidx];
@@ -126,18 +134,21 @@ graph * __loadd_create_edge(graph * g, int hidx, int tidx) {
 }
 
 
-graph * _loadd_check_and_create_edge(graph * g, int hidx, int tidx) {
-    int exists = __loadd_check_exists_edge(g, hidx, tidx);
+graph * _loadd_check_and_create_edge(graph * g, long long hidx, long long tidx) {
+    /*
+    long long exists = __loadd_check_exists_edge(g, hidx, tidx);
     if(exists == -1) {
         g = __loadd_create_edge(g, hidx, tidx);
     }
     return g;
+    */
+    return __loadd_create_edge(g, hidx, tidx);
 }
 
 int __loadd_cmp_vertex_by_label(const void * a, const void * b) {
     vertex * x = *((vertex **)a);
     vertex * y = *((vertex **)b);
-    return (atoi(x->label) - atoi(y->label));
+    return (atoll(x->label) - atoll(y->label));
 }
 
 
@@ -148,17 +159,17 @@ graph * _loadd_initialize_orphan_vertices(graph * g) {
     
     for(int i = 0; i < g->vlen; i ++) {
         if (i > 0) {
-            int first = atoi(g->vertices[i - 1]->label);
-            int second = atoi(g->vertices[i]->label);
-            int diff = second - first;
+            long long first = atoll(g->vertices[i - 1]->label);
+            long long second = atoll(g->vertices[i]->label);
+            long long diff = second - first;
             // potential orphan
             if (diff > 1) {
                 // use the length of the larger value as a conservative
                 // sizing estimate
-                int llen = strlen(g->vertices[i]->label);
+                long long llen = strlen(g->vertices[i]->label);
                 char * label = malloc(sizeof(char * ) * llen);
-                sprintf(label, "%d", (first + 1));
-                int idx = g->vlen;
+                sprintf(label, "%lld", (first + 1));
+                long long idx = g->vlen;
                 g = _loadd_check_and_create_vertex(g, label, llen, &idx);
             }
         }
@@ -167,9 +178,20 @@ graph * _loadd_initialize_orphan_vertices(graph * g) {
 }
 
 
+graph * __loadd_initialize_vmap(graph * g, int nrows) {
+    g->vmax = nrows;
+    g->vmap = malloc(sizeof(long long**) * nrows);
+    for(long long i = 0; i <= g->vmax; i ++) {
+        long long * val = malloc(sizeof(int*));
+        *val = -1;   // -1 is our null value - need to create
+        g->vmap[i] = val;
+    }
+    return g;
+}
+
 // provide a graph pointer to a graph pointer, g
 // and rows of file data from an adjancecy matrix
-graph * loadd_adj_list(char ** rows, int * nrows) {
+graph * loadd_adj_list(char ** rows, long long * nrows) {
     
     graph * g = malloc(sizeof(graph));
     g->elen = 0;
@@ -177,27 +199,28 @@ graph * loadd_adj_list(char ** rows, int * nrows) {
     g->directed = 1;
     g->vertices = NULL;
     g->edges = NULL;
+    g = __loadd_initialize_vmap(g, *nrows);
     
     char * label = NULL;
-    int llen = 0;  // length of the label
+    long long llen = 0;  // length of the label
     
-    for(int i = 0; i < *nrows; i ++) {
+    for(long long i = 0; i < *nrows; i ++) {
         if (i % 10000 == 0) {
-            printf("\nloadd.c: total: %d, processed: %d", *nrows, i);
+            printf("\nloadd.c: total: %lld, processed: %lld", *nrows, i);
         }
         
         // declare a clean variable for the row in question
         char * row = rows[i];
         
         // column count
-        int clen = 0;
+        long long clen = 0;
         
         // keep track of the char index
-        int cIdx = 0;
+        long long cIdx = 0;
         
         // keep track of head/tail index for all the tails to follow
-        int hidx = -1;
-        int tidx = -1;
+        long long hidx = -1;
+        long long tidx = -1;
         
         while(1) {
             char c = row[cIdx];
