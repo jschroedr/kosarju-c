@@ -52,10 +52,8 @@ void kosarju_dfs_loop(graph * g) {
 
 void kosarju_scc_twopass(graph * g) {
     
-    // g with arcs reversed
-    reverse_graph(g);
-    
     // run dfs-loop on g-rev
+    reverse_graph(g);
     kosarju_dfs_loop(g);
     
     // run dfs-loop on g

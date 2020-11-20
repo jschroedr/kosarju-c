@@ -66,24 +66,39 @@ graph * _loadd_check_and_create_vertex(graph * g, char * label, int llen, int * 
 }
 
 
-int __loadd_check_exists_edge(graph * g, int hidx, int tidx) {
-    char * head_label = g->vertices[hidx]->label;
-    char * tail_label = g->vertices[tidx]->label;
-    for(int i = 0; i < g->elen; i ++) {
-        edge * e = g->edges[i];
-        int exact_match = (
-            strcmp(e->head->label, head_label) &&
-            strcmp(e->tail->label, tail_label)
-        );
-        int reverse_match = (
-            strcmp(e->tail->label, head_label) && 
-            strcmp(e->head->label, tail_label)
-        );
-        if (exact_match == 1 || reverse_match == 1) {
+int __loadd_check_edge_by_vertex(vertex * v, int head_label, int tail_label) {
+    for(int i = 0; i < v->elen; i ++) {
+        edge * e = v->edges[i];
+        // directed graph, so only check for exact match
+        int cmp_head_label = atoi(e->head->label);
+        int cmp_tail_label = atoi(e->tail->label);
+        if (head_label == cmp_head_label && tail_label == cmp_tail_label) {
             return i;
         }
     }
-    return 0;
+    return -1;
+}
+
+
+int __loadd_check_exists_edge(graph * g, int hidx, int tidx) {
+    int head_label = atoi(g->vertices[hidx]->label);
+    int tail_label = atoi(g->vertices[tidx]->label);
+    
+    // check the head edges
+    vertex * head = g->vertices[hidx];
+    int head_check = __loadd_check_edge_by_vertex(head, head_label, tail_label);
+    if(head_check != -1) {
+        return head_check;
+    }
+    
+    // check the tail edges
+    vertex * tail = g->vertices[tidx];
+    int tail_check = __loadd_check_edge_by_vertex(tail, head_label, tail_label);
+    if (tail_check != -1) {
+        return tail_check;
+    }
+    
+    return -1;
 }
 
 
@@ -113,8 +128,40 @@ graph * __loadd_create_edge(graph * g, int hidx, int tidx) {
 
 graph * _loadd_check_and_create_edge(graph * g, int hidx, int tidx) {
     int exists = __loadd_check_exists_edge(g, hidx, tidx);
-    if(exists == 0) {
+    if(exists == -1) {
         g = __loadd_create_edge(g, hidx, tidx);
+    }
+    return g;
+}
+
+int __loadd_cmp_vertex_by_label(const void * a, const void * b) {
+    vertex * x = *((vertex **)a);
+    vertex * y = *((vertex **)b);
+    return (atoi(x->label) - atoi(y->label));
+}
+
+
+graph * _loadd_initialize_orphan_vertices(graph * g) {
+    // first, sort the graph's vertices by label
+    size_t size = sizeof(g->vertices[0]);
+    qsort(g->vertices, g->vlen, size, __loadd_cmp_vertex_by_label);
+    
+    for(int i = 0; i < g->vlen; i ++) {
+        if (i > 0) {
+            int first = atoi(g->vertices[i - 1]->label);
+            int second = atoi(g->vertices[i]->label);
+            int diff = second - first;
+            // potential orphan
+            if (diff > 1) {
+                // use the length of the larger value as a conservative
+                // sizing estimate
+                int llen = strlen(g->vertices[i]->label);
+                char * label = malloc(sizeof(char * ) * llen);
+                sprintf(label, "%d", (first + 1));
+                int idx = g->vlen;
+                g = _loadd_check_and_create_vertex(g, label, llen, &idx);
+            }
+        }
     }
     return g;
 }
@@ -135,6 +182,10 @@ graph * loadd_adj_list(char ** rows, int * nrows) {
     int llen = 0;  // length of the label
     
     for(int i = 0; i < *nrows; i ++) {
+        if (i % 10000 == 0) {
+            printf("\nloadd.c: total: %d, processed: %d", *nrows, i);
+        }
+        
         // declare a clean variable for the row in question
         char * row = rows[i];
         
@@ -183,6 +234,9 @@ graph * loadd_adj_list(char ** rows, int * nrows) {
     }
     // clean up local memory allocation for the function
     free(label);
+    
+    // ensure to add any orphaned vertices not included in rows!
+    g = _loadd_initialize_orphan_vertices(g);
     
     return g;
 }

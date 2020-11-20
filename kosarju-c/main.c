@@ -21,7 +21,7 @@
 
 
 char * getExampleFileName() {
-   return "./test-files/input_mostlyCycles_68_320000.txt";
+   return "./test-files/input_mostlyCycles_60_80000.txt";
 }
 
 /*
@@ -33,19 +33,35 @@ int main(int argc, char** argv) {
     int nrows = 0;
     char ** rows = loadFromAdjacencyList(fname, &nrows);
     graph * g = loadd_adj_list(rows, &nrows);
- 
+    
+    kosarju_scc_twopass(g);
+    
     garray * groups = groups_from_graph(g);
    
     sort_groups_by_size(groups);
     
+    /*
+    printf("\n");
+    for(int v = 0; v < g->vlen; v ++) {
+        printf("\nvertex: %s, leader: %s", g->vertices[v]->label, ((vertex *)g->vertices[v]->leader)->label);
+    }
+    */
+    
     printf("\n");
     for(int k = 0; k < 5; k ++) {
         if (k < groups->glen) {
-            printf("%d,", groups->groups[k]->len);
+            // printf("(leader: %s, len: %d),", groups->groups[k]->leader->label, groups->groups[k]->len);
+            if (k < 4) {
+                printf("%d,", groups->groups[k]->len);
+            } else {
+                printf("%d", groups->groups[k]->len);
+            }
+            
         } else {
             printf("0,");
         }
     }
+    
     
     
     free_graph(g);

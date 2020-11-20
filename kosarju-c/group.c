@@ -20,7 +20,7 @@ int _leader_in_groups(vertex * leader, garray * groups) {
             return 1;
         }
     }
-    return 0;
+    return -1;
 }
 
 
@@ -43,15 +43,15 @@ garray * groups_from_graph(graph * g) {
     int glen = 0;
     for(int i = 0; i < g->vlen; i ++) {
         vertex * leader = g->vertices[i]->leader;
+        // printf("\t\nlabel: %s, leader: %s", g->vertices[i]->label, leader->label);
         int present = _leader_in_groups(leader, groups);
-        if (present == 0) {
+        if (present == -1) {
             groups = _group_initialize(leader, groups);
         }
     }
     return groups;
 }
 
-// TODO: fix this struct comparison function
 int _compare_groups_by_size(const void * a, const void * b) {
     group * x = *((group **)a);
     group * y = *((group **)b);
